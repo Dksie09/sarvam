@@ -1,103 +1,77 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import React from "react";
+import ReactFlow, {
+  Background,
+  Controls,
+  ReactFlowProvider,
+  BackgroundVariant,
+  Node,
+  Edge,
+} from "reactflow";
+import "reactflow/dist/style.css";
+import { Plus } from "lucide-react";
+import { TopMenu } from "@/components/TopMenu";
+import { RightSidebar } from "@/components/RightSidebar";
+
+const initialNodes: Node[] = [];
+const initialEdges: Edge[] = [];
+
+// Main FlowAuthoringApp with updated layout
+export default function FlowAuthoringApp() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div className="h-screen w-full flex bg-gray-50">
+      {/* Main Content Area (Left side) */}
+      <div className="flex-1 flex flex-col">
+        {/* Top Menu - now only spans the left area */}
+        <TopMenu />
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+        {/* Flow Canvas */}
+        <div className="flex-1 relative">
+          <ReactFlowProvider>
+            <ReactFlow
+              nodes={initialNodes}
+              edges={initialEdges}
+              className="bg-white"
+              defaultViewport={{ x: 0, y: 0, zoom: 1 }}
+              minZoom={0.1}
+              maxZoom={2}
+              attributionPosition="bottom-left"
+            >
+              <Background
+                color="#F5F5F5"
+                gap={30}
+                size={5}
+                variant={BackgroundVariant.Dots}
+              />
+              <Controls
+                position="bottom-right"
+                className="bg-white shadow-lg border border-gray-200 rounded-lg"
+              />
+            </ReactFlow>
+
+            {/* Placeholder message when no nodes */}
+            {initialNodes.length === 0 && (
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                    <Plus className="w-8 h-8 text-blue-600" />
+                  </div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    Start Building Your Flow
+                  </h3>
+                  <p className="text-gray-500">
+                    Drag nodes from the sidebar to get started
+                  </p>
+                </div>
+              </div>
+            )}
+          </ReactFlowProvider>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </div>
+
+      {/* Right Sidebar - now takes full height */}
+      <RightSidebar />
     </div>
   );
 }
