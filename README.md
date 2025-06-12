@@ -80,7 +80,3 @@ This project was created as part of a [frontend assignment](https://www.notion.s
 ## License
 
 This project is open source and available under the [MIT License](LICENSE).
-
-```
-
-```
