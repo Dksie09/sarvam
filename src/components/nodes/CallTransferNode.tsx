@@ -57,6 +57,12 @@ export const CallTransferNode: React.FC<NodeProps<CallTransferNodeData>> = ({
     window.dispatchEvent(event);
   };
 
+  const handleRun = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const event = new CustomEvent("nodeRun", { detail: { nodeId: id } });
+    window.dispatchEvent(event);
+  };
+
   const isConfigured = data.destination && data.destination.trim() !== "";
 
   const getTransferTypeColor = (type: string) => {
@@ -100,6 +106,21 @@ export const CallTransferNode: React.FC<NodeProps<CallTransferNodeData>> = ({
       default:
         return null;
     }
+  };
+
+  const getRunButtonIcon = () => {
+    if (data.isLoading) {
+      return (
+        <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
+      );
+    }
+    if (data.isCompleted) {
+      return <div className="w-4 h-4 text-green-500">✓</div>;
+    }
+    if (data.isError) {
+      return <div className="w-4 h-4 text-red-500 mb-2">✕</div>;
+    }
+    return <Play className="w-4 h-4 text-gray-400" />;
   };
 
   return (
@@ -151,8 +172,11 @@ export const CallTransferNode: React.FC<NodeProps<CallTransferNodeData>> = ({
           >
             <Settings className="w-4 h-4 text-gray-400" />
           </button>
-          <button className="p-1 hover:bg-gray-100 rounded transition-colors">
-            <Play className="w-4 h-4 text-gray-400" />
+          <button
+            onClick={handleRun}
+            className="p-1 hover:bg-gray-100 rounded transition-colors"
+          >
+            {getRunButtonIcon()}
           </button>
         </div>
       </div>
@@ -216,6 +240,19 @@ export const CallTransferNode: React.FC<NodeProps<CallTransferNodeData>> = ({
             </p>
           )}
         </div>
+
+        {/* Error Message */}
+        {data.isError && data.errorMessage && (
+          <div className="mt-3 p-2 bg-red-50 border border-red-200 rounded-lg">
+            <div className="flex items-center gap-1 mb-1">
+              <AlertTriangle className="w-3 h-3 text-red-500" />
+              <span className="text-xs font-medium text-red-700">
+                Configuration Error
+              </span>
+            </div>
+            <p className="text-xs text-red-600 truncate">{data.errorMessage}</p>
+          </div>
+        )}
 
         {/* Additional configuration details */}
         {isConfigured && (

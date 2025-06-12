@@ -563,6 +563,72 @@ export default function FlowAuthoringApp() {
     return null; // No error
   }, []);
 
+  // Add node run handler
+  const handleNodeRun = useCallback(
+    (nodeId: string) => {
+      const node = nodes.find((n) => n.id === nodeId);
+      if (!node) return;
+
+      // Set loading state
+      setNodes((nds) =>
+        nds.map((n) =>
+          n.id === nodeId
+            ? {
+                ...n,
+                data: {
+                  ...n.data,
+                  isLoading: true,
+                  isCompleted: false,
+                  isError: false,
+                  errorMessage: undefined,
+                  lastTestResult: "pending",
+                },
+              }
+            : n
+        )
+      );
+
+      // Simulate validation after a short delay
+      setTimeout(() => {
+        const error = validateNode(node);
+        setNodes((nds) =>
+          nds.map((n) =>
+            n.id === nodeId
+              ? {
+                  ...n,
+                  data: {
+                    ...n.data,
+                    isLoading: false,
+                    isCompleted: !error,
+                    isError: !!error,
+                    errorMessage: error || undefined,
+                    lastTestResult: error ? "error" : "success",
+                  },
+                }
+              : n
+          )
+        );
+      }, 1000);
+    },
+    [nodes, validateNode]
+  );
+
+  // Add node run event listener
+  useEffect(() => {
+    const handleNodeRunEvent = (event: CustomEvent<{ nodeId: string }>) => {
+      handleNodeRun(event.detail.nodeId);
+    };
+
+    window.addEventListener("nodeRun", handleNodeRunEvent as EventListener);
+
+    return () => {
+      window.removeEventListener(
+        "nodeRun",
+        handleNodeRunEvent as EventListener
+      );
+    };
+  }, [handleNodeRun]);
+
   // Add animation handler
   const handleStartNodeClick = useCallback(
     (nodeId: string) => {

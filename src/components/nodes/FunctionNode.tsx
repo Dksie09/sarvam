@@ -47,6 +47,12 @@ export const FunctionNode: React.FC<NodeProps<FunctionNodeData>> = ({
     window.dispatchEvent(event);
   };
 
+  const handleRun = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const event = new CustomEvent("nodeRun", { detail: { nodeId: id } });
+    window.dispatchEvent(event);
+  };
+
   const isConfigured = data.code && data.code.trim() !== "";
   const language = data.language || "javascript";
 
@@ -87,6 +93,29 @@ export const FunctionNode: React.FC<NodeProps<FunctionNodeData>> = ({
       default:
         return null;
     }
+  };
+
+  const getRunButtonIcon = () => {
+    if (data.isLoading) {
+      return (
+        <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
+      );
+    }
+    if (data.isCompleted) {
+      return (
+        <div className="w-4 h-4 text-green-500 flex items-center justify-center">
+          ✓
+        </div>
+      );
+    }
+    if (data.isError) {
+      return (
+        <div className="w-4 h-4 text-red-500 flex items-center justify-center">
+          ✕
+        </div>
+      );
+    }
+    return <Play className="w-4 h-4 text-gray-400" />;
   };
 
   return (
@@ -138,8 +167,11 @@ export const FunctionNode: React.FC<NodeProps<FunctionNodeData>> = ({
           >
             <Settings className="w-4 h-4 text-gray-400" />
           </button>
-          <button className="p-1 hover:bg-gray-100 rounded transition-colors">
-            <Play className="w-4 h-4 text-gray-400" />
+          <button
+            onClick={handleRun}
+            className="p-1 hover:bg-gray-100 rounded transition-colors"
+          >
+            {getRunButtonIcon()}
           </button>
         </div>
       </div>
@@ -190,12 +222,12 @@ export const FunctionNode: React.FC<NodeProps<FunctionNodeData>> = ({
         </div>
 
         {/* Error Message */}
-        {data.lastTestResult === "error" && data.errorMessage && (
+        {data.isError && data.errorMessage && (
           <div className="mt-3 p-2 bg-red-50 border border-red-200 rounded-lg">
             <div className="flex items-center gap-1 mb-1">
               <AlertTriangle className="w-3 h-3 text-red-500" />
               <span className="text-xs font-medium text-red-700">
-                Test Failed
+                Configuration Error
               </span>
             </div>
             <p className="text-xs text-red-600 truncate">{data.errorMessage}</p>

@@ -1,6 +1,13 @@
 import React from "react";
 import { Handle, Position, NodeProps } from "reactflow";
-import { MessageSquare, X, Play, Plus, Settings } from "lucide-react";
+import {
+  MessageSquare,
+  X,
+  Play,
+  Plus,
+  Settings,
+  AlertTriangle,
+} from "lucide-react";
 
 interface ConversationNodeData {
   label: string;
@@ -14,6 +21,7 @@ interface ConversationNodeData {
   isCompleted?: boolean;
   isError?: boolean;
   errorMessage?: string;
+  lastTestResult?: "success" | "error" | "pending" | null;
 }
 
 export const ConversationNode: React.FC<NodeProps<ConversationNodeData>> = ({
@@ -42,6 +50,23 @@ export const ConversationNode: React.FC<NodeProps<ConversationNodeData>> = ({
     window.dispatchEvent(event);
   };
 
+  const handleRun = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (data.isError) {
+      // Reset state when clicking cross icon
+      const event = new CustomEvent("nodeRun", {
+        detail: {
+          nodeId: id,
+          reset: true,
+        },
+      });
+      window.dispatchEvent(event);
+    } else {
+      const event = new CustomEvent("nodeRun", { detail: { nodeId: id } });
+      window.dispatchEvent(event);
+    }
+  };
+
   const handleAddTransition = (e: React.MouseEvent) => {
     e.stopPropagation();
     const event = new CustomEvent("configureNode", {
@@ -52,6 +77,44 @@ export const ConversationNode: React.FC<NodeProps<ConversationNodeData>> = ({
 
   const hasConfiguredPrompt = data.prompt && data.prompt.trim() !== "";
   const transitions = data.transitions || [];
+
+  const getRunButtonIcon = () => {
+    if (data.isLoading) {
+      return (
+        <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
+      );
+    }
+    if (data.isCompleted) {
+      return (
+        <div className="w-4 h-4 text-green-500 flex items-center justify-center">
+          ✓
+        </div>
+      );
+    }
+    if (data.isError) {
+      return (
+        <div className="w-4 h-4 text-red-500 flex items-center justify-center">
+          ✕
+        </div>
+      );
+    }
+    return <Play className="w-4 h-4 text-gray-400" />;
+  };
+
+  const getTestResultIcon = () => {
+    switch (data.lastTestResult) {
+      case "success":
+        return <div className="w-2 h-2 bg-green-500 rounded-full"></div>;
+      case "error":
+        return <AlertTriangle className="w-3 h-3 text-red-500" />;
+      case "pending":
+        return (
+          <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
+        );
+      default:
+        return null;
+    }
+  };
 
   return (
     <div
@@ -92,6 +155,7 @@ export const ConversationNode: React.FC<NodeProps<ConversationNodeData>> = ({
             <span className="text-sm font-medium text-gray-900">
               {data.label || "Conversation Node"}
             </span>
+            {getTestResultIcon()}
           </div>
         </div>
         <div className="flex items-center gap-1">
@@ -101,8 +165,11 @@ export const ConversationNode: React.FC<NodeProps<ConversationNodeData>> = ({
           >
             <Settings className="w-4 h-4 text-gray-400" />
           </button>
-          <button className="p-1 hover:bg-gray-100 rounded transition-colors">
-            <Play className="w-4 h-4 text-gray-400" />
+          <button
+            onClick={handleRun}
+            className="p-1 hover:bg-gray-100 rounded transition-colors"
+          >
+            {getRunButtonIcon()}
           </button>
         </div>
       </div>
@@ -123,6 +190,19 @@ export const ConversationNode: React.FC<NodeProps<ConversationNodeData>> = ({
             </p>
           )}
         </div>
+
+        {/* Error Message */}
+        {data.isError && data.errorMessage && (
+          <div className="mt-3 p-2 bg-red-50 border border-red-200 rounded-lg">
+            <div className="flex items-center gap-1 mb-1">
+              <AlertTriangle className="w-3 h-3 text-red-500" />
+              <span className="text-xs font-medium text-red-700">
+                Configuration Error
+              </span>
+            </div>
+            <p className="text-xs text-red-600 truncate">{data.errorMessage}</p>
+          </div>
+        )}
 
         {/* Transitions Section - Only show if node is configured */}
         {hasConfiguredPrompt && (
