@@ -1,6 +1,6 @@
 import React from "react";
 import { Handle, Position, NodeProps } from "reactflow";
-import { MessageSquare, X, Play, Plus } from "lucide-react";
+import { MessageSquare, X, Play, Plus, Settings } from "lucide-react";
 
 interface ConversationNodeData {
   label: string;
@@ -24,6 +24,13 @@ export const ConversationNode: React.FC<NodeProps<ConversationNodeData>> = ({
   };
 
   const handleDoubleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const event = new CustomEvent("configureNode", {
+      detail: { nodeId: id, nodeData: data },
+    });
+    window.dispatchEvent(event);
+  };
+  const handleConfigure = (e: React.MouseEvent) => {
     e.stopPropagation();
     const event = new CustomEvent("configureNode", {
       detail: { nodeId: id, nodeData: data },
@@ -73,15 +80,23 @@ export const ConversationNode: React.FC<NodeProps<ConversationNodeData>> = ({
             </span>
           </div>
         </div>
-        <button className="p-1 hover:bg-gray-100 rounded transition-colors">
-          <Play className="w-4 h-4 text-gray-400" />
-        </button>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={handleConfigure}
+            className="p-1 hover:bg-gray-100 rounded transition-colors"
+          >
+            <Settings className="w-4 h-4 text-gray-400" />
+          </button>
+          <button className="p-1 hover:bg-gray-100 rounded transition-colors">
+            <Play className="w-4 h-4 text-gray-400" />
+          </button>
+        </div>
       </div>
 
       {/* Node Content */}
       <div className="p-3">
         {/* Prompt Preview */}
-        <div className="mb-3">
+        <div className="">
           {hasConfiguredPrompt ? (
             <p className="text-sm text-gray-700 line-clamp-3">
               {data.prompt!.length > 120
