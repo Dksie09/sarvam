@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { Hash, Trash2, Volume2, Clock, Pen, Keyboard } from "lucide-react";
+import {
+  Hash,
+  Trash2,
+  Volume2,
+  Clock,
+  Pen,
+  Keyboard,
+  User,
+  Send,
+} from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -116,6 +125,18 @@ export default function PressDigitConfigModal({
 
   const [isEditingLabel, setIsEditingLabel] = useState(false);
   const [tempLabel, setTempLabel] = useState("");
+  const [, setScreenSize] = useState<"mobile" | "tablet" | "desktop">(
+    "desktop"
+  );
+  const [testInput, setTestInput] = useState("");
+  const [testMessages, setTestMessages] = useState([
+    {
+      type: "system",
+      content: "Please press 1 for Sales, 2 for Support, or 3 for Billing.",
+    },
+    { type: "user", content: "1" },
+    { type: "system", content: "You selected Sales. Transferring you now..." },
+  ]);
 
   useEffect(() => {
     if (isOpen && nodeData) {
@@ -137,6 +158,24 @@ export default function PressDigitConfigModal({
       setTempLabel(nodeData.label || "Press Digit Node");
     }
   }, [isOpen, nodeData]);
+
+  useEffect(() => {
+    const checkScreenSize = () => {
+      const width = window.innerWidth;
+      if (width < 640) {
+        setScreenSize("mobile");
+      } else if (width < 1024) {
+        setScreenSize("tablet");
+      } else {
+        setScreenSize("desktop");
+      }
+    };
+
+    checkScreenSize();
+    window.addEventListener("resize", checkScreenSize);
+
+    return () => window.removeEventListener("resize", checkScreenSize);
+  }, []);
 
   // Auto-save when form data changes
   useEffect(() => {
@@ -234,9 +273,26 @@ export default function PressDigitConfigModal({
     return formData.digitMappings.some((m) => m.digit === digit);
   };
 
+  const handleSendTestMessage = () => {
+    if (testInput.trim()) {
+      setTestMessages((prev) => [
+        ...prev,
+        { type: "user", content: testInput },
+        {
+          type: "system",
+          content: "This is a simulated response based on your configuration.",
+        },
+      ]);
+      setTestInput("");
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-none w-[700px] max-h-[85vh] p-0 overflow-hidden">
+      <DialogContent
+        className="max-w-none w-[90vw] max-h-[85vh] p-0 overflow-hidden"
+        style={{ maxWidth: "700px" }}
+      >
         <div className="flex flex-col h-[85vh]">
           <DialogHeader className="p-6 border-b">
             <DialogTitle className="flex items-center gap-3">
@@ -276,11 +332,12 @@ export default function PressDigitConfigModal({
           <div className="flex-1 overflow-hidden">
             <Tabs
               defaultValue="configuration"
-              className="h-full flex flex-col mx-6"
+              className="h-full flex flex-col mx-4 sm:mx-6"
             >
               <TabsList className="w-full mt-4">
                 <TabsTrigger value="configuration">Configuration</TabsTrigger>
-                <TabsTrigger value="settings">Advanced Settings</TabsTrigger>
+                <TabsTrigger value="settings">Settings</TabsTrigger>
+                <TabsTrigger value="testing">Testing</TabsTrigger>
               </TabsList>
 
               <div className="flex-1 overflow-y-auto py-6">
@@ -332,12 +389,12 @@ export default function PressDigitConfigModal({
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <div className="grid grid-cols-6 gap-2">
+                      <div className="flex gap-2">
                         {AVAILABLE_DIGITS.map((digit) => (
                           <button
                             key={digit}
                             onClick={() => handleToggleDigit(digit)}
-                            className={`aspect-square border-2 rounded-lg flex items-center justify-center text-lg font-mono font-bold transition-all ${
+                            className={`aspect-square border py-2 px-4 rounded-md flex items-center justify-center text-base font-mono font-medium transition-all ${
                               isDigitSelected(digit)
                                 ? "border-sky-500 bg-sky-50 text-sky-700"
                                 : "border-gray-300 hover:border-sky-300 hover:bg-sky-50 text-gray-600"
@@ -609,6 +666,60 @@ export default function PressDigitConfigModal({
                           placeholder="I didn't receive any input. Let me repeat the options..."
                           className="min-h-[60px]"
                         />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="testing" className="space-y-6 m-0">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Test Digit Input</CardTitle>
+                      <CardDescription>
+                        Try out your digit input configuration
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex flex-col h-full">
+                        <div className="flex-1 overflow-y-auto space-y-4 mb-4">
+                          {testMessages.map((message, index) => (
+                            <div
+                              key={index}
+                              className={`flex gap-2 ${
+                                message.type === "user" ? "justify-end" : ""
+                              }`}
+                            >
+                              <div
+                                className={`max-w-[80%] p-3 rounded-lg text-sm ${
+                                  message.type === "user"
+                                    ? "bg-primary text-primary-foreground"
+                                    : "bg-background border"
+                                }`}
+                              >
+                                {message.content}
+                              </div>
+                              {message.type === "user" && (
+                                <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+                                  <User className="w-4 h-4" />
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+
+                        <div className="flex gap-2">
+                          <Input
+                            value={testInput}
+                            onChange={(e) => setTestInput(e.target.value)}
+                            placeholder="Type a digit to test..."
+                            onKeyPress={(e) =>
+                              e.key === "Enter" && handleSendTestMessage()
+                            }
+                          />
+                          <Button size="sm" onClick={handleSendTestMessage}>
+                            <Send className="w-4 h-4" />
+                          </Button>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>

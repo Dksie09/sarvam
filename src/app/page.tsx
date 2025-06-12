@@ -1171,7 +1171,7 @@ export default function FlowAuthoringApp() {
                   <h3 className="text-lg font-medium text-gray-900 mb-2">
                     Start Building Your Flow
                   </h3>
-                  <p className="text-gray-500">
+                  <p className="text-gray-500 text-xs md:text-base">
                     Drag nodes from the sidebar or click the plus button
                   </p>
                 </div>

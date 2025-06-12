@@ -36,6 +36,27 @@ export const TopMenu = ({ nodes, edges, onSave }: TopMenuProps) => {
   const [isSaving, setIsSaving] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
+  const [screenSize, setScreenSize] = useState<"mobile" | "tablet" | "desktop">(
+    "desktop"
+  );
+
+  useEffect(() => {
+    const checkScreenSize = () => {
+      const width = window.innerWidth;
+      if (width < 640) {
+        setScreenSize("mobile");
+      } else if (width < 1024) {
+        setScreenSize("tablet");
+      } else {
+        setScreenSize("desktop");
+      }
+    };
+
+    checkScreenSize();
+    window.addEventListener("resize", checkScreenSize);
+
+    return () => window.removeEventListener("resize", checkScreenSize);
+  }, []);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -133,27 +154,29 @@ export const TopMenu = ({ nodes, edges, onSave }: TopMenuProps) => {
   };
 
   return (
-    <div className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 shadow-sm">
+    <div className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-3 sm:px-4 lg:px-6 shadow-sm">
       {/* Left Section */}
-      <div className="flex items-center space-x-4">
+      <div className="flex items-center space-x-2 sm:space-x-4">
         <button className="flex items-center space-x-2 text-gray-600 hover:text-gray-800 transition-colors">
           <ArrowLeft className="w-5 h-5" />
-          <span className="font-medium">Back to Flows</span>
+          {screenSize !== "mobile" && (
+            <span className="font-medium">Back to Flows</span>
+          )}
         </button>
-        <div className="h-6 w-px bg-gray-300" />
-        <div className="flex items-end gap-3">
+        {screenSize !== "mobile" && <div className="h-6 w-px bg-gray-300" />}
+        <div className="flex items-end gap-2 sm:gap-3">
           {isRenaming ? (
             <Input
               value={flowName}
               onChange={(e) => setFlowName(e.target.value)}
               onBlur={handleRename}
               onKeyDown={(e) => e.key === "Enter" && handleRename()}
-              className="h-7 w-48"
+              className="h-7 w-32 sm:w-48"
               autoFocus
             />
           ) : (
             <div className="flex items-center gap-2">
-              <h1 className="text-lg font-semibold text-gray-900">
+              <h1 className="text-base sm:text-lg font-semibold text-gray-900 truncate max-w-[120px] sm:max-w-[200px] lg:max-w-none">
                 {flowName}
               </h1>
               <button
@@ -164,49 +187,61 @@ export const TopMenu = ({ nodes, edges, onSave }: TopMenuProps) => {
               </button>
             </div>
           )}
-          <p className="text-sm text-gray-500 mb-[2px]">Flow Editor</p>
+          {screenSize === "desktop" && (
+            <p className="text-sm text-gray-500 mb-[2px]">Flow Editor</p>
+          )}
         </div>
       </div>
 
       {/* Right Section */}
-      <div className="flex items-center space-x-3">
-        <button className="flex items-center space-x-2 px-3 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-all">
-          <Settings className="w-4 h-4" />
-          <span className="text-sm font-medium">Settings</span>
-        </button>
+      <div className="flex items-center space-x-2 sm:space-x-3">
+        {screenSize !== "mobile" && (
+          <>
+            {screenSize === "desktop" && (
+              <button className="flex items-center space-x-2 px-3 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-all">
+                <Settings className="w-4 h-4" />
+                <span className="text-sm font-medium">Settings</span>
+              </button>
+            )}
 
-        <button
-          onClick={handleSave}
-          className="flex items-center space-x-2 px-3 py-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-all"
-        >
-          {isSaving ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
-          ) : isSaved ? (
-            <Check className="w-4 h-4" />
-          ) : (
-            <Save className="w-4 h-4" />
-          )}
-          <span className="text-sm font-medium">Save</span>
-        </button>
+            <button
+              onClick={handleSave}
+              className="flex items-center space-x-2 px-2 sm:px-3 py-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-all"
+            >
+              {isSaving ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : isSaved ? (
+                <Check className="w-4 h-4" />
+              ) : (
+                <Save className="w-4 h-4" />
+              )}
+              {screenSize === "desktop" && (
+                <span className="text-sm font-medium">Save</span>
+              )}
+            </button>
 
-        <button
-          onClick={handleTestFlow}
-          disabled={isTesting}
-          className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all ${
-            isTesting
-              ? "bg-blue-400 cursor-not-allowed"
-              : "bg-blue-600 hover:bg-blue-700"
-          } text-white`}
-        >
-          {isTesting ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
-          ) : (
-            <Play className="w-4 h-4" />
-          )}
-          <span className="text-sm font-medium">
-            {isTesting ? "Running..." : "Test Flow"}
-          </span>
-        </button>
+            <button
+              onClick={handleTestFlow}
+              disabled={isTesting}
+              className={`flex items-center space-x-2 px-2 sm:px-4 py-2 rounded-lg transition-all ${
+                isTesting
+                  ? "bg-blue-400 cursor-not-allowed"
+                  : "bg-blue-600 hover:bg-blue-700"
+              } text-white`}
+            >
+              {isTesting ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Play className="w-4 h-4" />
+              )}
+              {screenSize === "desktop" && (
+                <span className="text-sm font-medium">
+                  {isTesting ? "Running..." : "Test Flow"}
+                </span>
+              )}
+            </button>
+          </>
+        )}
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -215,6 +250,33 @@ export const TopMenu = ({ nodes, edges, onSave }: TopMenuProps) => {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
+            {screenSize === "mobile" && (
+              <>
+                <DropdownMenuItem onClick={handleSave}>
+                  {isSaving ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : isSaved ? (
+                    <Check className="w-4 h-4 mr-2" />
+                  ) : (
+                    <Save className="w-4 h-4 mr-2" />
+                  )}
+                  Save
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={handleTestFlow}
+                  disabled={isTesting}
+                  className={isTesting ? "opacity-50 cursor-not-allowed" : ""}
+                >
+                  {isTesting ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Play className="w-4 h-4 mr-2" />
+                  )}
+                  {isTesting ? "Running..." : "Test Flow"}
+                </DropdownMenuItem>
+                <DropdownMenuItem className="h-px bg-gray-200 my-1" />
+              </>
+            )}
             <DropdownMenuItem>
               <Settings className="w-4 h-4 mr-2" />
               Settings
