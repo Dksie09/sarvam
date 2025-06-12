@@ -448,13 +448,20 @@ export default function FlowAuthoringApp() {
   const handleSaveNodeConfig = useCallback(
     (updatedData: Partial<NodeData>) => {
       if (configModal.nodeId) {
-        setNodes((nds) =>
-          nds.map((node) =>
+        setNodes((nds) => {
+          // First check if the node still exists
+          const nodeExists = nds.some((node) => node.id === configModal.nodeId);
+          if (!nodeExists) {
+            console.warn("Node no longer exists, skipping update");
+            return nds;
+          }
+
+          return nds.map((node) =>
             node.id === configModal.nodeId
               ? { ...node, data: { ...node.data, ...updatedData } }
               : node
-          )
-        );
+          );
+        });
       }
     },
     [configModal.nodeId, setNodes]

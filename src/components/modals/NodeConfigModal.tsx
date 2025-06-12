@@ -186,7 +186,11 @@ export default function NodeConfigModal({
   // Auto-save when form data changes
   useEffect(() => {
     if (isOpen && nodeData) {
-      onSave({ ...nodeData, ...formData });
+      const timeoutId = setTimeout(() => {
+        onSave({ ...nodeData, ...formData });
+      }, 500); // Add 500ms debounce
+
+      return () => clearTimeout(timeoutId);
     }
   }, [formData, isOpen, nodeData, onSave]);
 
