@@ -19,15 +19,31 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { Node, Edge } from "reactflow";
 
-export const TopMenu = () => {
+interface TopMenuProps {
+  nodes: Node[];
+  edges: Edge[];
+  onSave?: (nodes: Node[], edges: Edge[]) => void;
+}
+
+export const TopMenu = ({ nodes, edges, onSave }: TopMenuProps) => {
   const [isRenaming, setIsRenaming] = useState(false);
-  const [flowName, setFlowName] = useState("Untitled Flow");
+  const [flowName, setFlowName] = useState(() => {
+    // Try to load flow name from localStorage
+    const savedName = localStorage.getItem("flowName");
+    return savedName || "Untitled Flow";
+  });
   const [isSaving, setIsSaving] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
+
+  // Save flow name to localStorage when it changes
+  useEffect(() => {
+    localStorage.setItem("flowName", flowName);
+  }, [flowName]);
 
   const handleRename = () => {
     setIsRenaming(false);
@@ -84,12 +100,31 @@ export const TopMenu = () => {
 
   const handleSave = async () => {
     setIsSaving(true);
-    // Simulate save operation
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    setIsSaving(false);
-    setIsSaved(true);
-    // Reset saved state after 2 seconds
-    setTimeout(() => setIsSaved(false), 2000);
+    try {
+      // Save flow state to localStorage
+      const flowState = {
+        nodes,
+        edges,
+        flowName,
+        lastSaved: new Date().toISOString(),
+      };
+      localStorage.setItem("flowState", JSON.stringify(flowState));
+
+      // Call onSave callback if provided
+      if (onSave) {
+        onSave(nodes, edges);
+      }
+
+      setIsSaved(true);
+      toast.success("Flow saved successfully!");
+    } catch (error) {
+      toast.error("Failed to save flow");
+      console.error("Save error:", error);
+    } finally {
+      setIsSaving(false);
+      // Reset saved state after 2 seconds
+      setTimeout(() => setIsSaved(false), 2000);
+    }
   };
 
   return (

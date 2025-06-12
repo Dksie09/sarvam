@@ -53,9 +53,10 @@ interface DigitMapping {
   color: string;
 }
 
+// Define the node data type
 interface NodeData {
   id: string;
-  label?: string;
+  label: string;
   nodeType: string;
   // Conversation node specific fields
   prompt?: string;
@@ -97,11 +98,12 @@ interface NodeData {
   code?: string;
   retryCount?: number;
   onFailAction?: "stop" | "retry" | "continue";
-  lastTestResult?: "success" | "error" | "pending" | null;
-  errorMessage?: string;
+  // Common fields
   isLoading?: boolean;
   isCompleted?: boolean;
   isError?: boolean;
+  errorMessage?: string;
+  lastTestResult?: "success" | "error" | "pending" | null;
 }
 
 interface ConfigModalState {
@@ -189,8 +191,34 @@ const edgeTypes = {
 
 // Main FlowAuthoringApp with custom nodes and delete functionality
 export default function FlowAuthoringApp() {
+  // Initialize state with saved data or defaults
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+
+  // Load saved state on mount
+  useEffect(() => {
+    const savedState = localStorage.getItem("flowState");
+    if (savedState) {
+      try {
+        const { nodes: savedNodes, edges: savedEdges } = JSON.parse(savedState);
+        if (savedNodes) setNodes(savedNodes);
+        if (savedEdges) setEdges(savedEdges);
+      } catch (error) {
+        console.error("Error loading saved state:", error);
+      }
+    }
+  }, []);
+
+  // Save state when it changes
+  useEffect(() => {
+    const flowState = {
+      nodes,
+      edges,
+      lastSaved: new Date().toISOString(),
+    };
+    localStorage.setItem("flowState", JSON.stringify(flowState));
+  }, [nodes, edges]);
+
   const [reactFlowInstance, setReactFlowInstance] =
     useState<ReactFlowInstance | null>(null);
   const [selectedNodes, setSelectedNodes] = useState<string[]>([]);
@@ -1026,7 +1054,14 @@ export default function FlowAuthoringApp() {
       {/* Main Content Area (Left side) */}
       <div className="flex-1 flex flex-col">
         {/* Top Menu */}
-        <TopMenu />
+        <TopMenu
+          nodes={nodes}
+          edges={edges}
+          onSave={(savedNodes, savedEdges) => {
+            setNodes(savedNodes);
+            setEdges(savedEdges);
+          }}
+        />
 
         {/* Flow Canvas */}
         <div className="flex-1 relative" ref={reactFlowWrapper}>
