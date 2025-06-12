@@ -4,6 +4,10 @@ A React Flow–based visual editor for building and testing dynamic conversation
 
 ## DEMO
 
+
+https://github.com/user-attachments/assets/b8c602d1-e57b-4b8e-8c80-d1fa6a2e37df
+
+
 ## Project Structure
 ```
 src/
@@ -24,14 +28,14 @@ public/
 
 ## Functionality
 
-- Drag and drop nodes to build a flow visually.
+- Drag and drop nodes to build a flow.
 - Supports multiple node types:
   - Conversation
   - Call Transfer
   - Function Execution
   - Press Digit
   - End Call
-- Edit node settings via modals.
+- Edit node settings and config them via modals.
 - Connect and disconnect nodes dynamically.
 - Save flow state to local storage.
 - Test flow with step-by-step validation.
@@ -49,6 +53,7 @@ public/
    ```
    git clone [https://github.com/Dksie09/sarvam](https://github.com/Dksie09/sarvam)
    ```
+   cd into the folder
 
 2. Install dependencies:
 
