@@ -108,22 +108,17 @@ export const RightSidebar = () => {
     },
   ];
 
-  // const triggerNodes: Node[] = [
-  //   {
-  //     id: "manual",
-  //     name: "Manual",
-  //     description: "Manually trigger the flow",
-  //     icon: Play,
-  //     color: "text-blue-600",
-  //   },
-  //   {
-  //     id: "schedule",
-  //     name: "Schedule",
-  //     description: "Schedule the flow to run at specific times",
-  //     icon: Calendar,
-  //     color: "text-indigo-600",
-  //   },
-  // ];
+  // Add triggerNodes array
+  const triggerNodes: Node[] = [
+    {
+      id: "start",
+      name: "Start",
+      description: "Starting point of your flow",
+      icon: BoxIcon,
+      color: "text-blue-600",
+      category: "trigger",
+    },
+  ];
 
   const filterNodes = (nodes: Node[]) => {
     if (!searchQuery) return nodes;
@@ -191,24 +186,27 @@ export const RightSidebar = () => {
         {/* Tab Content */}
         <div className="flex-1 overflow-y-auto">
           <TabsContent value="triggers" className="mt-0 p-4">
-            <div className="flex items-center justify-center h-32">
-              <div className="text-center">
-                <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-3">
-                  <BoxIcon className="w-6 h-6 text-gray-400" />
-                </div>
-                <p className="text-sm text-gray-500 font-medium">Coming Soon</p>
-                <p className="text-xs text-gray-400 mt-1">
-                  Trigger nodes will be available soon
-                </p>
-              </div>
+            <div className="space-y-5">
+              {Object.entries(groupNodesByCategory(triggerNodes)).map(
+                ([category, nodes]) => (
+                  <div key={category} className="space-y-1">
+                    <h3 className="text-xs font-medium font-bold text-gray-400 uppercase tracking-wider px-1">
+                      {category}
+                    </h3>
+                    {nodes.map((node) => (
+                      <DraggableNode key={node.id} node={node} />
+                    ))}
+                  </div>
+                )
+              )}
             </div>
           </TabsContent>
 
           <TabsContent value="actions" className="mt-0 p-4">
-            <div className="space-y-6">
+            <div className="space-y-5">
               {Object.entries(groupNodesByCategory(actionNodes)).map(
                 ([category, nodes]) => (
-                  <div key={category} className="space-y-3">
+                  <div key={category} className="space-y-1">
                     <h3 className="text-xs font-medium font-bold text-gray-400 uppercase tracking-wider px-1">
                       {category}
                     </h3>

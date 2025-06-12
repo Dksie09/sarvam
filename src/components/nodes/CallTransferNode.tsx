@@ -1,26 +1,36 @@
 import React from "react";
 import { Handle, Position, NodeProps } from "reactflow";
-import { Zap, X, Play, Settings, Code, AlertTriangle } from "lucide-react";
+import {
+  PhoneCall,
+  X,
+  Play,
+  Settings,
+  Phone,
+  AlertTriangle,
+  User,
+} from "lucide-react";
 
-interface FunctionNodeData {
+interface CallTransferNodeData {
   label: string;
   nodeType: string;
-  language?: "javascript" | "python" | "cURL";
-  code?: string;
+  transferType?: "warm" | "cold" | "blind";
+  destination?: string;
+  destinationType?: "phone" | "extension" | "department" | "agent";
+  transferMessage?: string;
+  waitTime?: number;
   timeout?: number;
-  retryCount?: number;
-  onFailAction?: "stop" | "retry" | "continue";
+  fallbackAction?: "retry" | "end" | "continue";
+  priority?: "high" | "medium" | "low";
+  recordingAction?: "continue" | "stop" | "pause";
   isConfigured?: boolean;
   lastTestResult?: "success" | "error" | "pending" | null;
   errorMessage?: string;
-  isRetrying?: boolean;
-  currentRetryAttempt?: number;
   isLoading?: boolean;
   isCompleted?: boolean;
   isError?: boolean;
 }
 
-export const FunctionNode: React.FC<NodeProps<FunctionNodeData>> = ({
+export const CallTransferNode: React.FC<NodeProps<CallTransferNodeData>> = ({
   data,
   selected,
   id,
@@ -47,34 +57,37 @@ export const FunctionNode: React.FC<NodeProps<FunctionNodeData>> = ({
     window.dispatchEvent(event);
   };
 
-  const isConfigured = data.code && data.code.trim() !== "";
-  const language = data.language || "javascript";
+  const isConfigured = data.destination && data.destination.trim() !== "";
 
-  const getLanguageColor = (lang: string) => {
-    switch (lang.toLowerCase()) {
-      case "javascript":
-        return "bg-yellow-50 text-yellow-700 border-yellow-200";
-      case "python":
+  const getTransferTypeColor = (type: string) => {
+    switch (type) {
+      case "warm":
+        return "bg-green-50 text-green-700 border-green-200";
+      case "cold":
         return "bg-blue-50 text-blue-700 border-blue-200";
-      case "curl":
-        return "bg-pink-50 text-pink-700 border-pink-200";
+      case "blind":
+        return "bg-orange-50 text-orange-700 border-orange-200";
       default:
         return "bg-gray-50 text-gray-700 border-gray-200";
     }
   };
 
-  const getTestResultIcon = () => {
-    if (data.isRetrying) {
-      return (
-        <div className="flex items-center gap-1">
-          <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
-          <span className="text-xs text-yellow-600">
-            Retry {data.currentRetryAttempt || 1}
-          </span>
-        </div>
-      );
+  const getDestinationIcon = (type: string) => {
+    switch (type) {
+      case "phone":
+        return <Phone className="w-3 h-3" />;
+      case "extension":
+        return <span className="text-xs font-bold">#</span>;
+      case "department":
+        return <User className="w-3 h-3" />;
+      case "agent":
+        return <User className="w-3 h-3" />;
+      default:
+        return <Phone className="w-3 h-3" />;
     }
+  };
 
+  const getTestResultIcon = () => {
     switch (data.lastTestResult) {
       case "success":
         return <div className="w-2 h-2 bg-green-500 rounded-full"></div>;
@@ -93,7 +106,7 @@ export const FunctionNode: React.FC<NodeProps<FunctionNodeData>> = ({
     <div
       className={`relative bg-white rounded-lg border-2 shadow-sm min-w-[280px] max-w-[320px] transition-all cursor-pointer ${
         selected
-          ? "border-purple-500 shadow-lg ring-2 ring-purple-200"
+          ? "border-orange-500 shadow-lg ring-2 ring-orange-200"
           : "border-gray-200 hover:border-gray-300"
       }`}
       onDoubleClick={handleDoubleClick}
@@ -121,12 +134,12 @@ export const FunctionNode: React.FC<NodeProps<FunctionNodeData>> = ({
       {/* Node Header */}
       <div className="flex items-center justify-between p-3 border-b border-gray-100">
         <div className="flex items-center gap-2">
-          <div className="p-1.5 bg-purple-50 rounded-lg">
-            <Zap className="w-4 h-4 text-purple-600" />
+          <div className="p-1.5 bg-orange-50 rounded-lg">
+            <PhoneCall className="w-4 h-4 text-orange-600" />
           </div>
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium text-gray-900">
-              {data.label || "Function Node"}
+              {data.label || "Call Transfer"}
             </span>
             {getTestResultIcon()}
           </div>
@@ -146,41 +159,56 @@ export const FunctionNode: React.FC<NodeProps<FunctionNodeData>> = ({
 
       {/* Node Content */}
       <div className="p-3">
-        {/* Language Badge */}
-        {isConfigured && (
+        {/* Transfer Type Badge */}
+        {isConfigured && data.transferType && (
           <div className="mb-3 flex items-center gap-2">
             <span
-              className={`px-2 py-1 text-xs font-medium rounded border ${getLanguageColor(
-                language
+              className={`px-2 py-1 text-xs font-medium rounded border ${getTransferTypeColor(
+                data.transferType
               )}`}
             >
-              {language === "javascript"
-                ? "JavaScript"
-                : language === "python"
-                ? "Python"
-                : "cURL"}
+              {data.transferType === "warm"
+                ? "Warm Transfer"
+                : data.transferType === "cold"
+                ? "Cold Transfer"
+                : "Blind Transfer"}
             </span>
-            <span className="text-xs text-gray-500">
-              {data.timeout ? `${data.timeout}s timeout` : "No timeout"}
-            </span>
+            {data.priority && (
+              <span
+                className={`px-2 py-1 text-xs font-medium rounded border ${
+                  data.priority === "high"
+                    ? "bg-red-50 text-red-700 border-red-200"
+                    : data.priority === "medium"
+                    ? "bg-yellow-50 text-yellow-700 border-yellow-200"
+                    : "bg-green-50 text-green-700 border-green-200"
+                }`}
+              >
+                {data.priority} priority
+              </span>
+            )}
           </div>
         )}
 
-        {/* Code Preview */}
+        {/* Destination Preview */}
         <div className="">
           {isConfigured ? (
-            <div className="bg-gray-50 rounded-lg p-3 border">
-              <div className="flex items-center gap-2 mb-2">
-                <Code className="w-3 h-3 text-gray-500" />
-                <span className="text-xs font-medium text-gray-600">
-                  Code Preview
+            <div className="bg-orange-50 rounded-lg p-3 border border-orange-200">
+              <div className="flex items-center gap-2">
+                {getDestinationIcon(data.destinationType || "phone")}
+                <span className="text-xs font-medium text-orange-700">
+                  Transfer to {data.destinationType || "Phone"}
                 </span>
               </div>
-              <pre className="text-xs text-gray-700 font-mono leading-relaxed overflow-hidden">
-                {data.code!.length > 100
-                  ? `${data.code!.substring(0, 100)}...`
-                  : data.code}
-              </pre>
+
+              {data.transferMessage && (
+                <div className="mt-2 text-xs text-orange-600">
+                  &quot;
+                  {data.transferMessage.length > 80
+                    ? `${data.transferMessage.substring(0, 80)}...`
+                    : data.transferMessage}
+                  &quot;
+                </div>
+              )}
             </div>
           ) : (
             <p className="text-sm text-gray-400 italic">
@@ -189,27 +217,46 @@ export const FunctionNode: React.FC<NodeProps<FunctionNodeData>> = ({
           )}
         </div>
 
-        {/* Error Message */}
-        {data.lastTestResult === "error" && data.errorMessage && (
-          <div className="mt-3 p-2 bg-red-50 border border-red-200 rounded-lg">
-            <div className="flex items-center gap-1 mb-1">
-              <AlertTriangle className="w-3 h-3 text-red-500" />
-              <span className="text-xs font-medium text-red-700">
-                Test Failed
-              </span>
-            </div>
-            <p className="text-xs text-red-600 truncate">{data.errorMessage}</p>
+        {/* Additional configuration details */}
+        {isConfigured && (
+          <div className="space-y-2 mt-1">
+            {data.waitTime && data.waitTime > 0 && (
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-gray-500 flex items-center gap-1">
+                  {/* <Clock className="w-3 h-3" /> */}
+                  Wait time:
+                </span>
+                <span className="font-medium">{data.waitTime}s</span>
+              </div>
+            )}
+            {data.timeout && (
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-gray-500">Timeout:</span>
+                <span className="font-medium">{data.timeout}s</span>
+              </div>
+            )}
+            {data.recordingAction && (
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-gray-500">Recording:</span>
+                <span className="font-medium capitalize">
+                  {data.recordingAction}
+                </span>
+              </div>
+            )}
           </div>
         )}
 
         {/* Success/Failure Outputs */}
-        {isConfigured && (
-          <div className="mt-3 pt-3 border-t border-gray-100">
+        <div className="mt-3 pt-3 border-t border-gray-100">
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <span>Outputs</span>
+              <span>Success / Failure</span>
+            </div>
             <div className="space-y-1.5">
-              {/* Success Output */}
               <div className="flex items-center gap-2 text-xs text-gray-600 p-2 bg-green-50 rounded border relative">
-                <div className="w-1.5 h-1.5 bg-green-500 rounded-full flex-shrink-0"></div>
-                <span className="truncate flex-1">On Success</span>
+                <div className="w-1.5 h-1.5 bg-green-400 rounded-full flex-shrink-0"></div>
+                <span className="flex-1">On Success</span>
                 <Handle
                   type="source"
                   position={Position.Right}
@@ -223,10 +270,9 @@ export const FunctionNode: React.FC<NodeProps<FunctionNodeData>> = ({
                   }}
                 />
               </div>
-              {/* Failure Output */}
               <div className="flex items-center gap-2 text-xs text-gray-600 p-2 bg-red-50 rounded border relative">
-                <div className="w-1.5 h-1.5 bg-red-500 rounded-full flex-shrink-0"></div>
-                <span className="truncate flex-1">On Failure</span>
+                <div className="w-1.5 h-1.5 bg-red-400 rounded-full flex-shrink-0"></div>
+                <span className="flex-1">On Failure</span>
                 <Handle
                   type="source"
                   position={Position.Right}
@@ -242,7 +288,7 @@ export const FunctionNode: React.FC<NodeProps<FunctionNodeData>> = ({
               </div>
             </div>
           </div>
-        )}
+        </div>
       </div>
 
       {/* Main Input Handle */}

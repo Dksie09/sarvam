@@ -10,6 +10,10 @@ interface ConversationNodeData {
   aiModel?: string;
   voice?: string;
   language?: string;
+  isLoading?: boolean;
+  isCompleted?: boolean;
+  isError?: boolean;
+  errorMessage?: string;
 }
 
 export const ConversationNode: React.FC<NodeProps<ConversationNodeData>> = ({
@@ -58,11 +62,21 @@ export const ConversationNode: React.FC<NodeProps<ConversationNodeData>> = ({
       }`}
       onDoubleClick={handleDoubleClick}
     >
+      {data.isLoading && (
+        <div className="absolute -top-2 -right-2 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center shadow-lg z-20">
+          <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      )}
+      {data.isCompleted && (
+        <div className="absolute -top-2 -right-2 w-5 h-5 bg-green-500 text-white rounded-full flex items-center justify-center shadow-lg z-20 text-xs animate-tick">
+          ✓
+        </div>
+      )}
       {/* Delete button - only show when selected */}
       {selected && (
         <button
           onClick={handleDelete}
-          className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center shadow-lg transition-colors z-10"
+          className="absolute -top-2 -left-2 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center shadow-lg transition-colors z-10"
         >
           <X className="w-3 h-3" />
         </button>
@@ -98,7 +112,7 @@ export const ConversationNode: React.FC<NodeProps<ConversationNodeData>> = ({
         {/* Prompt Preview */}
         <div className="">
           {hasConfiguredPrompt ? (
-            <p className="text-sm text-gray-700 line-clamp-3">
+            <p className="text-sm text-gray-700 line-clamp-3 border rounded-lg border-pink-200 p-2">
               {data.prompt!.length > 120
                 ? `${data.prompt!.substring(0, 120)}...`
                 : data.prompt}
@@ -112,7 +126,7 @@ export const ConversationNode: React.FC<NodeProps<ConversationNodeData>> = ({
 
         {/* Transitions Section - Only show if node is configured */}
         {hasConfiguredPrompt && (
-          <div className="space-y-2">
+          <div className="space-y-2 mt-2">
             <div className="flex items-center justify-between">
               <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Transitions

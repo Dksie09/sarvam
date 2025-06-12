@@ -51,7 +51,7 @@ interface FunctionConfigModalProps {
   nodeData: {
     id: string;
     label?: string;
-    language?: "javascript" | "python" | "curl";
+    programmingLanguage?: "javascript" | "python" | "curl";
     code?: string;
     timeout?: number;
     retryCount?: number;
@@ -154,7 +154,7 @@ export default function FunctionConfigModal({
 }: FunctionConfigModalProps) {
   const [formData, setFormData] = useState({
     label: "",
-    language: "javascript" as "javascript" | "python" | "curl",
+    programmingLanguage: "javascript" as "javascript" | "python" | "curl",
     code: "",
     timeout: 30,
     retryCount: 0,
@@ -177,7 +177,7 @@ export default function FunctionConfigModal({
     if (isOpen && nodeData) {
       setFormData({
         label: nodeData.label || "Function Node",
-        language: nodeData.language || "javascript",
+        programmingLanguage: nodeData.programmingLanguage || "javascript",
         code: nodeData.code || CODE_TEMPLATES.javascript,
         timeout: nodeData.timeout || 30,
         retryCount: nodeData.retryCount || 0,
@@ -190,7 +190,7 @@ export default function FunctionConfigModal({
   const handleLanguageChange = (language: "javascript" | "python" | "curl") => {
     setFormData((prev) => ({
       ...prev,
-      language,
+      programmingLanguage: language,
       code: CODE_TEMPLATES[language],
     }));
   };
@@ -215,7 +215,7 @@ export default function FunctionConfigModal({
         try {
           // Replace {{variable}} with actual values
           let processedCode = formData.code;
-          if (formData.language === "javascript") {
+          if (formData.programmingLanguage === "javascript") {
             processedCode = processedCode.replace(
               /{{input\.([^}]+)}}/g,
               (_, key) => {
@@ -236,7 +236,7 @@ export default function FunctionConfigModal({
 
           // Mock console output
           const consoleOutput =
-            formData.language === "javascript"
+            formData.programmingLanguage === "javascript"
               ? `Input value: ${testInputData.message}\n`
               : `Input value: ${testInputData.message}\n`;
 
@@ -353,7 +353,7 @@ export default function FunctionConfigModal({
                         </div>
                       )}
                       <Badge variant="outline" className="">
-                        {getLanguageIcon(formData.language)}
+                        {getLanguageIcon(formData.programmingLanguage)}
                       </Badge>
                     </DialogTitle>
                     <DialogDescription>
@@ -381,7 +381,7 @@ export default function FunctionConfigModal({
                           <div className="space-y-2">
                             <Label>Programming Language</Label>
                             <Select
-                              value={formData.language}
+                              value={formData.programmingLanguage}
                               onValueChange={handleLanguageChange}
                             >
                               <SelectTrigger className="w-[200px]">
@@ -405,7 +405,8 @@ export default function FunctionConfigModal({
                                 Code Editor
                               </CardTitle>
                               <CardDescription>
-                                Write your {formData.language} function here.
+                                Write your {formData.programmingLanguage}{" "}
+                                function here.
                               </CardDescription>
                             </CardHeader>
                             <CardContent>
@@ -419,7 +420,7 @@ export default function FunctionConfigModal({
                                         code: e.target.value,
                                       }))
                                     }
-                                    placeholder={`Enter your ${formData.language} code here...`}
+                                    placeholder={`Enter your ${formData.programmingLanguage} code here...`}
                                     className=" font-mono text-sm bg-gray-50 absolute inset-0 z-10 resize-none opacity-0"
                                   />
                                   <div
@@ -427,7 +428,7 @@ export default function FunctionConfigModal({
                                     dangerouslySetInnerHTML={{
                                       __html: highlightCode(
                                         formData.code,
-                                        formData.language
+                                        formData.programmingLanguage
                                       ),
                                     }}
                                   />
@@ -440,7 +441,9 @@ export default function FunctionConfigModal({
                                     onClick={() =>
                                       setFormData((prev) => ({
                                         ...prev,
-                                        code: CODE_TEMPLATES[prev.language],
+                                        code: CODE_TEMPLATES[
+                                          prev.programmingLanguage
+                                        ],
                                       }))
                                     }
                                   >
