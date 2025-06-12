@@ -1,3 +1,4 @@
+"use client";
 import {
   ArrowLeft,
   Play,
@@ -31,18 +32,22 @@ interface TopMenuProps {
 
 export const TopMenu = ({ nodes, edges, onSave }: TopMenuProps) => {
   const [isRenaming, setIsRenaming] = useState(false);
-  const [flowName, setFlowName] = useState(() => {
-    // Try to load flow name from localStorage
-    const savedName = localStorage.getItem("flowName");
-    return savedName || "Untitled Flow";
-  });
+  const [flowName, setFlowName] = useState("Untitled Flow");
   const [isSaving, setIsSaving] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
 
-  // Save flow name to localStorage when it changes
   useEffect(() => {
-    localStorage.setItem("flowName", flowName);
+    if (typeof window !== "undefined") {
+      const savedName = localStorage.getItem("flowName");
+      if (savedName) setFlowName(savedName);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("flowName", flowName);
+    }
   }, [flowName]);
 
   const handleRename = () => {

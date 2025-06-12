@@ -216,6 +216,7 @@ export default function FlowAuthoringApp() {
       edges,
       lastSaved: new Date().toISOString(),
     };
+
     localStorage.setItem("flowState", JSON.stringify(flowState));
   }, [nodes, edges]);
 
