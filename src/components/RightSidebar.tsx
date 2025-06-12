@@ -11,8 +11,8 @@ import {
   PhoneCall,
   Hash,
   PhoneOff,
-  Calendar,
-  Play,
+  // Calendar,
+  // Play,
   X,
 } from "lucide-react";
 import { Separator } from "./ui/separator";
@@ -25,6 +25,41 @@ interface Node {
   color: string;
   category?: string;
 }
+
+// Draggable Node Component
+const DraggableNode = ({ node }: { node: Node }) => {
+  const onDragStart = (event: React.DragEvent, nodeType: string) => {
+    event.dataTransfer.setData("application/reactflow", nodeType);
+    event.dataTransfer.effectAllowed = "move";
+  };
+
+  return (
+    <div
+      key={node.id}
+      className="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 cursor-grab active:cursor-grabbing group border border-transparent hover:border-gray-200 transition-all"
+      draggable
+      onDragStart={(event) => onDragStart(event, node.id)}
+    >
+      <div className="p-1.5 bg-gray-100 rounded-lg group-hover:bg-gray-200 transition-colors">
+        <node.icon className={`w-4 h-4 ${node.color}`} />
+      </div>
+      <div className="flex-1 min-w-0">
+        <h4 className="text-sm font-medium text-gray-900 mb-1">{node.name}</h4>
+        <p className="text-xs text-gray-500 leading-relaxed">
+          {node.description}
+        </p>
+      </div>
+      {/* Drag indicator */}
+      <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="flex flex-col gap-0.5">
+          <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
+          <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
+          <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 // Updated RightSidebar component
 export const RightSidebar = () => {
@@ -73,22 +108,22 @@ export const RightSidebar = () => {
     },
   ];
 
-  const triggerNodes: Node[] = [
-    {
-      id: "manual",
-      name: "Manual",
-      description: "Manually trigger the flow",
-      icon: Play,
-      color: "text-blue-600",
-    },
-    {
-      id: "schedule",
-      name: "Schedule",
-      description: "Schedule the flow to run at specific times",
-      icon: Calendar,
-      color: "text-indigo-600",
-    },
-  ];
+  // const triggerNodes: Node[] = [
+  //   {
+  //     id: "manual",
+  //     name: "Manual",
+  //     description: "Manually trigger the flow",
+  //     icon: Play,
+  //     color: "text-blue-600",
+  //   },
+  //   {
+  //     id: "schedule",
+  //     name: "Schedule",
+  //     description: "Schedule the flow to run at specific times",
+  //     icon: Calendar,
+  //     color: "text-indigo-600",
+  //   },
+  // ];
 
   const filterNodes = (nodes: Node[]) => {
     if (!searchQuery) return nodes;
@@ -156,26 +191,6 @@ export const RightSidebar = () => {
         {/* Tab Content */}
         <div className="flex-1 overflow-y-auto">
           <TabsContent value="triggers" className="mt-0 p-4">
-            {/* <div className="space-y-3">
-              {filterNodes(triggerNodes).map((node) => (
-                <div
-                  key={node.id}
-                  className="flex items-start gap-3 p-1 rounded-lg hover:bg-gray-50 cursor-pointer group"
-                >
-                  <div className="p-1.5 bg-gray-100 rounded-lg group-hover:bg-gray-200">
-                    <node.icon className={`w-4 h-4 ${node.color}`} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h4 className="text-sm font-medium text-gray-900 mb-1">
-                      {node.name}
-                    </h4>
-                    <p className="text-xs text-gray-500 leading-relaxed">
-                      {node.description}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div> */}
             <div className="flex items-center justify-center h-32">
               <div className="text-center">
                 <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-3">
@@ -188,6 +203,7 @@ export const RightSidebar = () => {
               </div>
             </div>
           </TabsContent>
+
           <TabsContent value="actions" className="mt-0 p-4">
             <div className="space-y-6">
               {Object.entries(groupNodesByCategory(actionNodes)).map(
@@ -197,39 +213,14 @@ export const RightSidebar = () => {
                       {category}
                     </h3>
                     {nodes.map((node) => (
-                      <div
-                        key={node.id}
-                        className="flex items-start gap-3 p-1 rounded-lg hover:bg-gray-50 cursor-pointer group"
-                      >
-                        <div className="p-1.5 bg-gray-100 rounded-lg group-hover:bg-gray-200">
-                          <node.icon className={`w-4 h-4 ${node.color}`} />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="text-sm font-medium text-gray-900 mb-1">
-                            {node.name}
-                          </h4>
-                          <p className="text-xs text-gray-500 leading-relaxed">
-                            {node.description}
-                          </p>
-                        </div>
-                      </div>
+                      <DraggableNode key={node.id} node={node} />
                     ))}
                   </div>
                 )
               )}
             </div>
-
-            {/* Request Team Section */}
-            {/* <div className="mt-6 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-              <div className="flex items-center gap-2 mb-2">
-                <Plus className="w-4 h-4 text-blue-600" />
-                <h4 className="text-sm font-medium text-blue-900">
-                  Request node
-                </h4>
-              </div>
-              <p className="text-xs text-blue-700">Request our team</p>
-            </div> */}
           </TabsContent>
+
           <TabsContent value="custom" className="mt-0 p-4">
             <div className="flex items-center justify-center h-32">
               <div className="text-center">
@@ -245,6 +236,13 @@ export const RightSidebar = () => {
           </TabsContent>
         </div>
       </Tabs>
+
+      {/* Fixed warning at bottom */}
+      <div className="p-4 border-t border-gray-200 bg-gray-50">
+        <p className="text-xs text-gray-500 text-center">
+          💡 Double click on the node to open its settings
+        </p>
+      </div>
     </div>
   );
 };
