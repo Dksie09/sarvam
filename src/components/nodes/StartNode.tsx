@@ -26,12 +26,11 @@ export const StartNode: React.FC<NodeProps<StartNodeData>> = ({
 
   return (
     <div
-      className={`relative bg-white rounded-lg border-2 shadow-sm w-[80px] h-[80px] flex items-center justify-center transition-all cursor-pointer ${
+      className={`relative bg-white rounded-lg border-2 shadow-sm w-[80px] h-[80px] flex items-center justify-center transition-all ${
         selected
           ? "border-green-500 shadow-lg ring-2 ring-green-200"
           : "border-gray-200 hover:border-gray-300"
       }`}
-      onClick={handleClick}
     >
       {/* Delete button - only show when selected */}
       {selected && (
@@ -45,9 +44,12 @@ export const StartNode: React.FC<NodeProps<StartNodeData>> = ({
 
       {/* Node Content */}
       <div className="flex flex-col items-center gap-1">
-        <div className="p-1.5 bg-green-50 rounded-lg">
+        <button
+          onClick={handleClick}
+          className="p-1.5 bg-green-50 rounded-lg hover:bg-green-100 transition-colors cursor-pointer"
+        >
           <Play className="w-4 h-4 text-green-600" />
-        </div>
+        </button>
         <span className="text-xs font-medium text-gray-900">
           {data.label || "Start"}
         </span>

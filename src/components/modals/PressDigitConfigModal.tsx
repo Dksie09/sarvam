@@ -120,21 +120,30 @@ export default function PressDigitConfigModal({
   useEffect(() => {
     if (isOpen && nodeData) {
       setFormData({
-        label: nodeData.label || "Press Digit",
+        label: nodeData.label || "Press Digit Node",
         instructions: nodeData.instructions || "",
         digitMappings: nodeData.digitMappings || [],
         maxAttempts: nodeData.maxAttempts || 3,
-        pauseDetectionDelay: nodeData.pauseDetectionDelay || 2,
-        interDigitTimeout: nodeData.interDigitTimeout || 5,
-        totalInputTimeout: nodeData.totalInputTimeout || 30,
-        invalidInputMessage: nodeData.invalidInputMessage || "",
-        timeoutMessage: nodeData.timeoutMessage || "",
-        repeatInstructions: nodeData.repeatInstructions || true,
+        pauseDetectionDelay: nodeData.pauseDetectionDelay || 1000,
+        interDigitTimeout: nodeData.interDigitTimeout || 5000,
+        totalInputTimeout: nodeData.totalInputTimeout || 30000,
+        invalidInputMessage:
+          nodeData.invalidInputMessage || "Invalid input. Please try again.",
+        timeoutMessage:
+          nodeData.timeoutMessage || "No input received. Please try again.",
+        repeatInstructions: nodeData.repeatInstructions || false,
         dtmfSensitivity: nodeData.dtmfSensitivity || 50,
       });
-      setTempLabel(nodeData.label || "Press Digit");
+      setTempLabel(nodeData.label || "Press Digit Node");
     }
   }, [isOpen, nodeData]);
+
+  // Auto-save when form data changes
+  useEffect(() => {
+    if (isOpen && nodeData) {
+      onSave({ ...nodeData, ...formData });
+    }
+  }, [formData, isOpen, nodeData, onSave]);
 
   const handleLoadTemplate = (template: (typeof TEMPLATES)[0]) => {
     setFormData((prev) => ({
@@ -205,7 +214,6 @@ export default function PressDigitConfigModal({
   const handleLabelSave = () => {
     const updatedData = { ...formData, label: tempLabel };
     setFormData(updatedData);
-    onSave({ ...nodeData, ...updatedData });
     setIsEditingLabel(false);
   };
 
@@ -614,12 +622,7 @@ export default function PressDigitConfigModal({
             <Button variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button
-              onClick={handleSave}
-              className="bg-sky-600 hover:bg-sky-700"
-            >
-              Save Configuration
-            </Button>
+            <Button onClick={handleSave}>Save Changes</Button>
           </div>
         </div>
       </DialogContent>

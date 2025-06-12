@@ -455,7 +455,6 @@ export default function FlowAuthoringApp() {
           )
         );
       }
-      setConfigModal({ isOpen: false, nodeId: null, nodeData: null });
     },
     [configModal.nodeId, setNodes]
   );

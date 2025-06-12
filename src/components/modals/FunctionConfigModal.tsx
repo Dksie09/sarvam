@@ -187,6 +187,13 @@ export default function FunctionConfigModal({
     }
   }, [isOpen, nodeData]);
 
+  // Auto-save when form data changes
+  useEffect(() => {
+    if (isOpen && nodeData) {
+      onSave({ ...nodeData, ...formData });
+    }
+  }, [formData, isOpen, nodeData, onSave]);
+
   const handleLanguageChange = (language: "javascript" | "python" | "curl") => {
     setFormData((prev) => ({
       ...prev,
@@ -275,7 +282,6 @@ export default function FunctionConfigModal({
   const handleLabelSave = () => {
     const updatedData = { ...formData, label: tempLabel };
     setFormData(updatedData);
-    onSave({ ...nodeData, ...updatedData });
     setIsEditingLabel(false);
   };
 

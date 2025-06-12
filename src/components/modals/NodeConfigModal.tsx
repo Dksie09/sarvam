@@ -183,16 +183,17 @@ export default function NodeConfigModal({
     }
   }, [isOpen, nodeData]);
 
+  // Auto-save when form data changes
+  useEffect(() => {
+    if (isOpen && nodeData) {
+      onSave({ ...nodeData, ...formData });
+    }
+  }, [formData, isOpen, nodeData, onSave]);
+
   const handleLabelSave = () => {
     const updatedData = { ...formData, label: tempLabel };
     setFormData(updatedData);
-    onSave({ ...nodeData, ...updatedData });
     setIsEditingLabel(false);
-  };
-
-  const handleSave = () => {
-    onSave({ ...nodeData, ...formData });
-    onClose();
   };
 
   const handleAddTransition = (transition?: string) => {
@@ -254,6 +255,11 @@ export default function NodeConfigModal({
       ]);
       setTestInput("");
     }
+  };
+
+  const handleSave = () => {
+    onSave({ ...nodeData, ...formData });
+    onClose();
   };
 
   return (
@@ -1010,9 +1016,7 @@ export default function NodeConfigModal({
             <Button variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button className="" onClick={handleSave}>
-              Save Changes
-            </Button>
+            <Button onClick={handleSave}>Save Changes</Button>
           </div>
         </div>
       </DialogContent>
